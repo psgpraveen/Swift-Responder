@@ -6,7 +6,7 @@ import { useAmbulanceTracker } from "../hooks/use-ambulance-tracker";
 import { useLiveLocation } from "../hooks/use-live-location";
 import { useNotificationSound } from "../hooks/use-notification-sound";
 import { useToast } from "../hooks/use-toast";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Sidebar from "../components/sidebar";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -20,20 +20,6 @@ import {
 } from "lucide-react";
 
 export default function Home() {
-  const {
-    status,
-    ambulances,
-    userLocation: defaultUserLocation,
-    dispatchedAmbulance,
-    destinationHospital,
-    eta,
-    distance,
-    dispatchAmbulance,
-    reset,
-    route,
-    isLoadingHospitals,
-  } = useAmbulanceTracker();
-
   const {
     location: liveLocation,
     error: locationError,
@@ -49,7 +35,30 @@ export default function Home() {
   const { toast } = useToast();
   const { notify } = useNotificationSound();
 
-  // SOS Emergency Handler
+  // FIX: Make userLocation stable
+  const userLocation = useMemo(() => {
+    return useLiveTracking && liveLocation
+      ? { lat: liveLocation.lat, lng: liveLocation.lng }
+      : { lat: 34.0522, lng: -118.2437 };
+  }, [useLiveTracking, liveLocation]);
+
+  const {
+    status,
+    ambulances,
+    dispatchedAmbulance,
+    destinationHospital,
+    eta,
+    distance,
+    dispatchAmbulance,
+    reset,
+    route,
+    isLoadingHospitals,
+    useGeminiSearch,
+    setUseGeminiSearch,
+    medicalNeeds,
+    setMedicalNeeds,
+  } = useAmbulanceTracker(userLocation);
+
   const handleSOS = () => {
     setShowSOS(true);
     notify("alert");
@@ -59,34 +68,22 @@ export default function Home() {
       variant: "destructive",
     });
 
-    // Auto-dispatch after confirmation
     setTimeout(() => {
-      if (status === "IDLE") {
-        dispatchAmbulance();
-      }
+      if (status === "IDLE") dispatchAmbulance();
       setShowSOS(false);
     }, 2000);
   };
 
-  // Notify on status changes
   useEffect(() => {
-    if (status === "DISPATCHED") {
-      notify("dispatch");
-    } else if (status === "ARRIVED") {
-      notify("arrived");
-    }
-  }, [status, notify]); // Use live location if available and enabled, otherwise use default
-  const userLocation =
-    useLiveTracking && liveLocation
-      ? { lat: liveLocation.lat, lng: liveLocation.lng }
-      : defaultUserLocation;
+    if (status === "DISPATCHED") notify("dispatch");
+    else if (status === "ARRIVED") notify("arrived");
+  }, [status, notify]);
 
   const locationAccuracy = liveLocation?.accuracy;
 
   useEffect(() => {
     setIsClient(true);
 
-    // Check for Google Maps API
     if (
       !process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
       process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY === "YOUR_API_KEY"
@@ -100,7 +97,6 @@ export default function Home() {
     }
   }, [toast]);
 
-  // Show location error toast
   useEffect(() => {
     if (locationError && useLiveTracking) {
       toast({
@@ -111,12 +107,11 @@ export default function Home() {
     }
   }, [locationError, useLiveTracking, toast]);
 
-  // Show success toast when location is acquired
   useEffect(() => {
     if (liveLocation && useLiveTracking && !isLocationLoading) {
       toast({
         title: "Live Location Active",
-        description: `Tracking your location with ±${Math.round(
+        description: `Tracking with ±${Math.round(
           liveLocation.accuracy || 0
         )}m accuracy`,
         duration: 3000,
@@ -124,30 +119,23 @@ export default function Home() {
     }
   }, [liveLocation, useLiveTracking, isLocationLoading, toast]);
 
-  if (!isClient) {
-    return null;
-  }
+  if (!isClient) return null;
 
   return (
     <div className="flex flex-col h-screen w-screen bg-background font-body">
       <Header />
 
-      {/* SOS Emergency Button - Fixed Position */}
       {status === "IDLE" && (
         <div className="fixed bottom-8 right-8 z-50">
           <Button
             size="lg"
             onClick={handleSOS}
             disabled={showSOS}
-            className={`
-              rounded-full w-20 h-20 shadow-2xl
-              ${
-                showSOS
-                  ? "bg-red-500 animate-pulse"
-                  : "bg-red-600 hover:bg-red-700"
-              }
-              transition-all hover:scale-110
-            `}>
+            className={`rounded-full w-20 h-20 shadow-2xl ${
+              showSOS
+                ? "bg-red-500 animate-pulse"
+                : "bg-red-600 hover:bg-red-700"
+            } transition-all hover:scale-110`}>
             <div className="flex flex-col items-center">
               <AlertTriangle className="w-8 h-8" />
               <span className="text-xs font-bold mt-1">SOS</span>
@@ -156,8 +144,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* Location Control Bar */}
-      <div className="bg-card/50 backdrop-blur-sm border-b border-white/10 px-4 py-2 flex items-center justify-between z-10">
+      <div className="bg-card/50 backdrop-blur-sm border-b border-white/10 px-4 py-2 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {isLocationSupported ? (
             <>
@@ -204,16 +191,14 @@ export default function Home() {
                       ±{Math.round(locationAccuracy)}m
                     </Badge>
                   )}
-                  {liveLocation.speed !== null &&
-                    liveLocation.speed !== undefined &&
-                    liveLocation.speed > 0.5 && (
-                      <Badge
-                        variant="outline"
-                        className="border-blue-500 text-blue-500">
-                        <Navigation2 className="w-3 h-3 mr-1" />
-                        {(liveLocation.speed * 3.6).toFixed(1)} km/h
-                      </Badge>
-                    )}
+                  {liveLocation.speed > 0.5 && (
+                    <Badge
+                      variant="outline"
+                      className="border-blue-500 text-blue-500">
+                      <Navigation2 className="w-3 h-3 mr-1" />
+                      {(liveLocation.speed * 3.6).toFixed(1)} km/h
+                    </Badge>
+                  )}
                 </>
               )}
             </>
@@ -273,6 +258,10 @@ export default function Home() {
           onReset={reset}
           isLoadingHospitals={isLoadingHospitals}
           userLocation={userLocation}
+          useGeminiSearch={useGeminiSearch}
+          setUseGeminiSearch={setUseGeminiSearch}
+          medicalNeeds={medicalNeeds}
+          setMedicalNeeds={setMedicalNeeds}
         />
         <div className="flex-1 relative">
           <AmbulanceMapEnhanced

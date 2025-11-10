@@ -13,11 +13,16 @@ import {
   Activity,
   Baby,
   Loader2,
+  Sparkles,
+  Zap,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Switch } from "./ui/switch";
 import type { Ambulance, Hospital } from "../lib/types";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useToast } from "../hooks/use-toast";
 import { WeatherWidget } from "./weather-widget";
 
@@ -31,6 +36,10 @@ type SidebarProps = {
   onReset: () => void;
   isLoadingHospitals?: boolean;
   userLocation?: { lat: number; lng: number };
+  useGeminiSearch?: boolean;
+  setUseGeminiSearch?: (value: boolean) => void;
+  medicalNeeds?: string;
+  setMedicalNeeds?: (value: string) => void;
 };
 
 export default function Sidebar({
@@ -43,9 +52,32 @@ export default function Sidebar({
   onReset,
   isLoadingHospitals = false,
   userLocation,
+  useGeminiSearch = true,
+  setUseGeminiSearch,
+  medicalNeeds = "emergency care",
+  setMedicalNeeds,
 }: SidebarProps) {
   const [isCalling, setIsCalling] = useState(false);
   const { toast } = useToast();
+
+  // Stable handlers to prevent infinite loops - empty deps since setter functions are already stable
+  const handleGeminiToggle = useCallback(
+    (value: boolean) => {
+      if (setUseGeminiSearch) {
+        setUseGeminiSearch(value);
+      }
+    },
+    [] // Empty deps - setUseGeminiSearch is stable from useCallback in hook
+  );
+
+  const handleMedicalNeedsChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (setMedicalNeeds) {
+        setMedicalNeeds(e.target.value);
+      }
+    },
+    [] // Empty deps - setMedicalNeeds is stable from useCallback in hook
+  );
 
   const handleCall = () => {
     setIsCalling(!isCalling);
@@ -150,6 +182,29 @@ export default function Sidebar({
                   <p className="text-xs text-muted-foreground mt-1">
                     {destinationHospital.address}
                   </p>
+
+                  {/* AI Reasoning (if available) */}
+                  {destinationHospital.reason && (
+                    <div className="mt-3 bg-purple-500/10 border border-purple-500/20 rounded-md p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="w-4 h-4 text-purple-400" />
+                        <span className="text-xs font-semibold text-purple-400">
+                          Gemini AI Analysis
+                        </span>
+                        {destinationHospital.suitabilityScore && (
+                          <Badge
+                            variant="outline"
+                            className="ml-auto border-purple-500/50 text-purple-400 text-xs">
+                            Score:{" "}
+                            {destinationHospital.suitabilityScore.toFixed(1)}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {destinationHospital.reason}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div className="flex items-center gap-2 bg-muted/50 rounded-md p-2">
@@ -295,23 +350,92 @@ export default function Sidebar({
       case "IDLE":
       default:
         return (
-          <div className="text-center space-y-6 py-8">
-            <div className="space-y-2">
-              <div className="relative inline-block mb-4">
-                <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl"></div>
-                <Siren className="relative w-20 h-20 mx-auto text-accent drop-shadow-lg" />
+          <div className="space-y-6 py-4">
+            {/* Gemini AI Controls */}
+            <div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg p-4 space-y-4">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-purple-400" />
+                <h3 className="font-semibold">AI-Powered Search</h3>
+                {useGeminiSearch && (
+                  <Badge
+                    variant="outline"
+                    className="ml-auto border-purple-500/50 text-purple-400">
+                    <Zap className="w-3 h-3 mr-1" />
+                    Gemini AI
+                  </Badge>
+                )}
               </div>
-              <p className="text-muted-foreground">
-                In case of emergency, request an ambulance immediately.
-              </p>
+
+              {/* Gemini Toggle */}
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label
+                    htmlFor="gemini-toggle"
+                    className="text-sm font-medium">
+                    Use Gemini AI
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    AI ranks hospitals by need & availability
+                  </p>
+                </div>
+                <Switch
+                  id="gemini-toggle"
+                  checked={useGeminiSearch}
+                  onCheckedChange={handleGeminiToggle}
+                />
+              </div>
+
+              {/* Medical Needs Input */}
+              <div className="space-y-2">
+                <Label htmlFor="medical-needs" className="text-sm">
+                  Medical Emergency Type
+                </Label>
+                <Input
+                  id="medical-needs"
+                  placeholder="e.g., cardiac emergency, trauma, stroke..."
+                  value={medicalNeeds}
+                  onChange={handleMedicalNeedsChange}
+                  className="bg-background/50"
+                  disabled={!useGeminiSearch}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {useGeminiSearch
+                    ? "AI will find best hospitals for this condition"
+                    : "Enable AI search to use this feature"}
+                </p>
+              </div>
+
+              {useGeminiSearch && (
+                <div className="flex items-start gap-2 text-xs text-purple-400 bg-purple-500/5 rounded p-2">
+                  <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <span>
+                    Gemini AI will analyze real hospitals, consider your medical
+                    needs, and recommend the best option with detailed
+                    reasoning.
+                  </span>
+                </div>
+              )}
             </div>
-            <Button
-              onClick={onDispatch}
-              size="lg"
-              className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-lg py-8 shadow-lg hover:shadow-xl transition-all">
-              <Siren className="mr-2 h-6 w-6" />
-              Request Ambulance
-            </Button>
+
+            {/* Request Button */}
+            <div className="text-center space-y-4">
+              <div className="space-y-2">
+                <div className="relative inline-block mb-4">
+                  <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl"></div>
+                  <Siren className="relative w-20 h-20 mx-auto text-accent drop-shadow-lg" />
+                </div>
+                <p className="text-muted-foreground">
+                  In case of emergency, request an ambulance immediately.
+                </p>
+              </div>
+              <Button
+                onClick={onDispatch}
+                size="lg"
+                className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-lg py-8 shadow-lg hover:shadow-xl transition-all">
+                <Siren className="mr-2 h-6 w-6" />
+                Request Ambulance
+              </Button>
+            </div>
           </div>
         );
     }

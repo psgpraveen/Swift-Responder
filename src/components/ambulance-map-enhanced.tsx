@@ -108,6 +108,23 @@ type AmbulanceMapEnhancedProps = {
   onLocationRefresh?: () => void;
 };
 
+// Component that uses map context - must be inside APIProvider
+function MapController({
+  onMapReady,
+}: {
+  onMapReady: (map: google.maps.Map) => void;
+}) {
+  const map = useMap();
+
+  React.useEffect(() => {
+    if (map) {
+      onMapReady(map);
+    }
+  }, [map, onMapReady]);
+
+  return null;
+}
+
 export default function AmbulanceMapEnhanced({
   userLocation,
   ambulances,
@@ -131,15 +148,10 @@ export default function AmbulanceMapEnhanced({
   const [heading, setHeading] = useState<number>(0);
   const [showFullscreen, setShowFullscreen] = useState(false);
 
-  // Get map instance through context
-  const map = useMap();
-
-  // Store map instance when available
-  React.useEffect(() => {
-    if (map && !mapInstance) {
-      setMapInstance(map);
-    }
-  }, [map, mapInstance]); // Zoom controls
+  // Handle map ready callback
+  const handleMapReady = useCallback((map: google.maps.Map) => {
+    setMapInstance(map);
+  }, []); // Zoom controls
   const handleZoomIn = useCallback(() => {
     if (mapInstance) {
       const currentZoom = mapInstance.getZoom() || 14;
@@ -287,6 +299,7 @@ export default function AmbulanceMapEnhanced({
   return (
     <div className="relative w-full h-full">
       <APIProvider apiKey={apiKey}>
+        <MapController onMapReady={handleMapReady} />
         <Map
           mapId="swift-responder-map"
           center={userLocation}

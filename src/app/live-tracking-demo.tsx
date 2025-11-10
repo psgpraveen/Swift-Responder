@@ -13,20 +13,6 @@ import { Locate, MapPinOff } from "lucide-react";
 
 export default function LiveTrackingPage() {
   const {
-    status,
-    ambulances,
-    userLocation: defaultUserLocation,
-    dispatchedAmbulance,
-    destinationHospital,
-    eta,
-    distance,
-    dispatchAmbulance,
-    reset,
-    route,
-    isLoadingHospitals,
-  } = useAmbulanceTracker();
-
-  const {
     location: liveLocation,
     error: locationError,
     isLoading: isLocationLoading,
@@ -39,11 +25,25 @@ export default function LiveTrackingPage() {
   const [useLiveTracking, setUseLiveTracking] = useState(true);
   const { toast } = useToast();
 
-  // Use live location if available and enabled, otherwise use default
+  // Use live location if available and enabled, otherwise use fallback
   const userLocation =
     useLiveTracking && liveLocation
       ? { lat: liveLocation.lat, lng: liveLocation.lng }
-      : defaultUserLocation;
+      : { lat: 34.0522, lng: -118.2437 }; // Fallback to LA
+
+  // Pass userLocation to the hook
+  const {
+    status,
+    ambulances,
+    dispatchedAmbulance,
+    destinationHospital,
+    eta,
+    distance,
+    dispatchAmbulance,
+    reset,
+    route,
+    isLoadingHospitals,
+  } = useAmbulanceTracker(userLocation);
 
   const locationAccuracy = liveLocation?.accuracy;
 

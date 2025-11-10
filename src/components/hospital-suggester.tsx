@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { Button } from "../components/ui/button";
 import {
   Dialog,
@@ -62,7 +63,10 @@ function SubmitButton() {
 
 export default function HospitalSuggester() {
   const initialState: State = { message: null, errors: {} };
-  const [state, dispatch] = useFormState(getHospitalSuggestions, initialState);
+  const [state, dispatch] = useActionState(
+    getHospitalSuggestions,
+    initialState
+  );
 
   return (
     <Dialog>
