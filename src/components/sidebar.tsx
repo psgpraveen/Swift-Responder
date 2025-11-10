@@ -12,28 +12,37 @@ import {
   Stethoscope,
   Activity,
   Baby,
+  Loader2,
 } from "lucide-react";
 import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
 import type { Ambulance, Hospital } from "../lib/types";
 import { useState } from "react";
 import { useToast } from "../hooks/use-toast";
+import { WeatherWidget } from "./weather-widget";
 
 type SidebarProps = {
   status: "IDLE" | "DISPATCHING" | "DISPATCHED" | "ARRIVED";
   eta: number | null;
+  distance: number | null;
   dispatchedAmbulance: Ambulance | null;
   destinationHospital: Hospital | null;
   onDispatch: () => void;
   onReset: () => void;
+  isLoadingHospitals?: boolean;
+  userLocation?: { lat: number; lng: number };
 };
 
 export default function Sidebar({
   status,
   eta,
+  distance,
   dispatchedAmbulance,
   destinationHospital,
   onDispatch,
   onReset,
+  isLoadingHospitals = false,
+  userLocation,
 }: SidebarProps) {
   const [isCalling, setIsCalling] = useState(false);
   const { toast } = useToast();
@@ -67,19 +76,20 @@ export default function Sidebar({
               <p className="font-semibold text-lg">
                 Dispatching nearest ambulance...
               </p>
-              <p className="text-sm text-muted-foreground">
-                Finding best hospital...
-              </p>
+              {isLoadingHospitals ? (
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Searching nearby hospitals...</span>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Calculating optimal route...
+                </p>
+              )}
               <div className="flex justify-center gap-1 mt-4">
-                <div
-                  className="w-2 h-2 bg-primary rounded-full animate-bounce"
-                  style={{ animationDelay: "0ms" }}></div>
-                <div
-                  className="w-2 h-2 bg-primary rounded-full animate-bounce"
-                  style={{ animationDelay: "150ms" }}></div>
-                <div
-                  className="w-2 h-2 bg-primary rounded-full animate-bounce"
-                  style={{ animationDelay: "300ms" }}></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:0ms]"></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:150ms]"></div>
+                <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:300ms]"></div>
               </div>
             </div>
           </div>
@@ -107,6 +117,25 @@ export default function Sidebar({
                 <p className="font-bold text-xl">
                   {status === "ARRIVED" ? "Arrived! 🎉" : `${eta} min`}
                 </p>
+                {status === "DISPATCHED" && eta && eta > 0 && (
+                  <>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Approximately{" "}
+                      {new Date(Date.now() + eta * 60000).toLocaleTimeString(
+                        [],
+                        {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
+                    </p>
+                    {distance !== null && distance > 0 && (
+                      <p className="text-xs text-primary mt-1 font-medium">
+                        {distance.toFixed(2)} km away
+                      </p>
+                    )}
+                  </>
+                )}
               </div>
             </div>
             {destinationHospital && (
@@ -170,6 +199,73 @@ export default function Sidebar({
                 </div>
               </div>
             )}
+
+            {/* Weather Conditions */}
+            {userLocation && (
+              <div className="border-t pt-4">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">
+                  Current Conditions
+                </p>
+                <WeatherWidget
+                  location={userLocation}
+                  showImpactAnalysis={status === "DISPATCHED"}
+                />
+              </div>
+            )}
+
+            {/* Driver Information */}
+            {dispatchedAmbulance?.driver && (
+              <div className="bg-card/50 border rounded-lg p-4 space-y-2">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Driver Information
+                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold">
+                      {dispatchedAmbulance.driver.name}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {dispatchedAmbulance.driver.phone}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-yellow-500">★</span>
+                    <span className="font-semibold">
+                      {dispatchedAmbulance.driver.rating.toFixed(1)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Equipment Available */}
+            {dispatchedAmbulance?.equipment && (
+              <div className="bg-card/50 border rounded-lg p-4 space-y-2">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Equipment On Board
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {dispatchedAmbulance.equipment.defibrillator && (
+                    <Badge variant="secondary" className="text-xs">
+                      <Activity className="w-3 h-3 mr-1" />
+                      Defibrillator
+                    </Badge>
+                  )}
+                  {dispatchedAmbulance.equipment.oxygen && (
+                    <Badge variant="secondary" className="text-xs">
+                      <AirVent className="w-3 h-3 mr-1" />
+                      Oxygen
+                    </Badge>
+                  )}
+                  {dispatchedAmbulance.equipment.ventilator && (
+                    <Badge variant="secondary" className="text-xs">
+                      Ventilator
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-2 pt-4">
               <Button
                 onClick={handleCall}

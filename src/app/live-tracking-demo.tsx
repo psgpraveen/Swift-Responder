@@ -4,22 +4,14 @@ import AmbulanceMapEnhanced from "../components/ambulance-map-enhanced";
 import Header from "../components/layout/header";
 import { useAmbulanceTracker } from "../hooks/use-ambulance-tracker";
 import { useLiveLocation } from "../hooks/use-live-location";
-import { useNotificationSound } from "../hooks/use-notification-sound";
 import { useToast } from "../hooks/use-toast";
 import { useEffect, useState } from "react";
 import Sidebar from "../components/sidebar";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import {
-  Locate,
-  MapPinOff,
-  Navigation2,
-  Wifi,
-  WifiOff,
-  AlertTriangle,
-} from "lucide-react";
+import { Locate, MapPinOff } from "lucide-react";
 
-export default function Home() {
+export default function LiveTrackingPage() {
   const {
     status,
     ambulances,
@@ -45,37 +37,9 @@ export default function Home() {
 
   const [isClient, setIsClient] = useState(false);
   const [useLiveTracking, setUseLiveTracking] = useState(true);
-  const [showSOS, setShowSOS] = useState(false);
   const { toast } = useToast();
-  const { notify } = useNotificationSound();
 
-  // SOS Emergency Handler
-  const handleSOS = () => {
-    setShowSOS(true);
-    notify("alert");
-    toast({
-      title: "🚨 SOS ACTIVATED",
-      description: "Emergency services are being notified!",
-      variant: "destructive",
-    });
-
-    // Auto-dispatch after confirmation
-    setTimeout(() => {
-      if (status === "IDLE") {
-        dispatchAmbulance();
-      }
-      setShowSOS(false);
-    }, 2000);
-  };
-
-  // Notify on status changes
-  useEffect(() => {
-    if (status === "DISPATCHED") {
-      notify("dispatch");
-    } else if (status === "ARRIVED") {
-      notify("arrived");
-    }
-  }, [status, notify]); // Use live location if available and enabled, otherwise use default
+  // Use live location if available and enabled, otherwise use default
   const userLocation =
     useLiveTracking && liveLocation
       ? { lat: liveLocation.lat, lng: liveLocation.lng }
@@ -94,7 +58,7 @@ export default function Home() {
       toast({
         title: "Map API Key Missing",
         description:
-          "The map is disabled. Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env file.",
+          "The map is disabled. Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env.local file.",
         variant: "destructive",
       });
     }
@@ -116,10 +80,9 @@ export default function Home() {
     if (liveLocation && useLiveTracking && !isLocationLoading) {
       toast({
         title: "Live Location Active",
-        description: `Tracking your location with ±${Math.round(
+        description: `Accuracy: ±${Math.round(
           liveLocation.accuracy || 0
-        )}m accuracy`,
-        duration: 3000,
+        )} meters`,
       });
     }
   }, [liveLocation, useLiveTracking, isLocationLoading, toast]);
@@ -132,55 +95,22 @@ export default function Home() {
     <div className="flex flex-col h-screen w-screen bg-background font-body">
       <Header />
 
-      {/* SOS Emergency Button - Fixed Position */}
-      {status === "IDLE" && (
-        <div className="fixed bottom-8 right-8 z-50">
-          <Button
-            size="lg"
-            onClick={handleSOS}
-            disabled={showSOS}
-            className={`
-              rounded-full w-20 h-20 shadow-2xl
-              ${
-                showSOS
-                  ? "bg-red-500 animate-pulse"
-                  : "bg-red-600 hover:bg-red-700"
-              }
-              transition-all hover:scale-110
-            `}>
-            <div className="flex flex-col items-center">
-              <AlertTriangle className="w-8 h-8" />
-              <span className="text-xs font-bold mt-1">SOS</span>
-            </div>
-          </Button>
-        </div>
-      )}
-
-      {/* Location Control Bar */}
-      <div className="bg-card/50 backdrop-blur-sm border-b border-white/10 px-4 py-2 flex items-center justify-between z-10">
+      {/* Location Controls Bar */}
+      <div className="bg-card/50 backdrop-blur-sm border-b border-white/10 px-4 py-2 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {isLocationSupported ? (
             <>
               <Badge
-                variant={
-                  useLiveTracking && liveLocation ? "default" : "secondary"
-                }
-                className={
-                  useLiveTracking && liveLocation ? "bg-green-500" : ""
-                }>
-                {useLiveTracking && liveLocation ? (
+                variant={useLiveTracking ? "default" : "secondary"}
+                className={useLiveTracking ? "bg-green-500" : ""}>
+                {useLiveTracking ? (
                   <>
-                    <Wifi className="w-3 h-3 mr-2 animate-pulse" />
-                    Live GPS Active
-                  </>
-                ) : isLocationLoading ? (
-                  <>
-                    <Wifi className="w-3 h-3 mr-2 animate-spin" />
-                    Acquiring GPS...
+                    <span className="w-2 h-2 bg-white rounded-full animate-pulse mr-2" />
+                    Live Tracking
                   </>
                 ) : (
                   <>
-                    <WifiOff className="w-3 h-3 mr-2" />
+                    <MapPinOff className="w-3 h-3 mr-2" />
                     Static Location
                   </>
                 )}
@@ -188,29 +118,18 @@ export default function Home() {
 
               {liveLocation && useLiveTracking && (
                 <>
-                  <Badge variant="outline" className="font-mono text-xs">
+                  <Badge variant="outline">
                     {liveLocation.lat.toFixed(6)}, {liveLocation.lng.toFixed(6)}
                   </Badge>
                   {locationAccuracy && (
-                    <Badge
-                      variant="outline"
-                      className={
-                        locationAccuracy < 20
-                          ? "border-green-500 text-green-500"
-                          : locationAccuracy < 50
-                          ? "border-yellow-500 text-yellow-500"
-                          : "border-orange-500 text-orange-500"
-                      }>
+                    <Badge variant="outline">
                       ±{Math.round(locationAccuracy)}m
                     </Badge>
                   )}
                   {liveLocation.speed !== null &&
                     liveLocation.speed !== undefined &&
-                    liveLocation.speed > 0.5 && (
-                      <Badge
-                        variant="outline"
-                        className="border-blue-500 text-blue-500">
-                        <Navigation2 className="w-3 h-3 mr-1" />
+                    liveLocation.speed > 0 && (
+                      <Badge variant="outline">
                         {(liveLocation.speed * 3.6).toFixed(1)} km/h
                       </Badge>
                     )}
@@ -218,10 +137,7 @@ export default function Home() {
               )}
             </>
           ) : (
-            <Badge variant="destructive">
-              <WifiOff className="w-3 h-3 mr-2" />
-              Geolocation Not Supported
-            </Badge>
+            <Badge variant="destructive">Geolocation Not Supported</Badge>
           )}
         </div>
 
@@ -229,21 +145,18 @@ export default function Home() {
           {isLocationSupported && (
             <>
               <Button
-                variant={useLiveTracking ? "default" : "outline"}
+                variant="outline"
                 size="sm"
-                onClick={() => setUseLiveTracking(!useLiveTracking)}
-                className={
-                  useLiveTracking ? "bg-green-600 hover:bg-green-700" : ""
-                }>
+                onClick={() => setUseLiveTracking(!useLiveTracking)}>
                 {useLiveTracking ? (
                   <>
-                    <Locate className="w-4 h-4 mr-2" />
-                    GPS Enabled
+                    <MapPinOff className="w-4 h-4 mr-2" />
+                    Use Static Location
                   </>
                 ) : (
                   <>
-                    <MapPinOff className="w-4 h-4 mr-2" />
-                    Enable GPS
+                    <Locate className="w-4 h-4 mr-2" />
+                    Enable Live Tracking
                   </>
                 )}
               </Button>
@@ -254,7 +167,7 @@ export default function Home() {
                   size="sm"
                   onClick={refreshLocation}
                   disabled={isLocationLoading}>
-                  {isLocationLoading ? "Refreshing..." : "Refresh"}
+                  {isLocationLoading ? "Refreshing..." : "Refresh Location"}
                 </Button>
               )}
             </>
