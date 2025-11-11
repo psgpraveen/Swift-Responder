@@ -99,22 +99,22 @@ export default function Sidebar({
     switch (status) {
       case "DISPATCHING":
         return (
-          <div className="text-center py-8 space-y-4">
+          <div className="text-center py-4 sm:py-6 md:py-8 space-y-3 sm:space-y-4">
             <div className="relative inline-block">
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse"></div>
-              <Siren className="relative w-16 h-16 mx-auto animate-spin text-primary drop-shadow-lg" />
+              <Siren className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mx-auto animate-spin text-primary drop-shadow-lg" />
             </div>
             <div className="space-y-2">
-              <p className="font-semibold text-lg">
+              <p className="font-semibold text-base sm:text-lg">
                 Dispatching nearest ambulance...
               </p>
               {isLoadingHospitals ? (
-                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                  <Loader2 className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
                   <span>Searching nearby hospitals...</span>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Calculating optimal route...
                 </p>
               )}
@@ -129,29 +129,29 @@ export default function Sidebar({
       case "DISPATCHED":
       case "ARRIVED":
         return (
-          <div className="space-y-4 animate-in fade-in slide-in-from-right duration-500">
-            <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">
+          <div className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-right duration-500">
+            <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 sm:p-4">
+              <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">
                 Ambulance
               </p>
-              <p className="font-semibold text-lg mt-1">
+              <p className="font-semibold text-base sm:text-lg mt-1">
                 {dispatchedAmbulance?.id} - {dispatchedAmbulance?.vehicle}
               </p>
             </div>
-            <div className="flex items-center gap-3 bg-accent/10 border border-accent/20 rounded-lg p-4">
-              <div className="bg-accent/20 p-2 rounded-full">
-                <Clock className="w-5 h-5 text-accent" />
+            <div className="flex items-center gap-2 sm:gap-3 bg-accent/10 border border-accent/20 rounded-lg p-3 sm:p-4">
+              <div className="bg-accent/20 p-1.5 sm:p-2 rounded-full">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">
                   Estimated Arrival
                 </p>
-                <p className="font-bold text-xl">
+                <p className="font-bold text-lg sm:text-xl">
                   {status === "ARRIVED" ? "Arrived! 🎉" : `${eta} min`}
                 </p>
                 {status === "DISPATCHED" && eta && eta > 0 && (
                   <>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                       Approximately{" "}
                       {new Date(Date.now() + eta * 60000).toLocaleTimeString(
                         [],
@@ -162,7 +162,7 @@ export default function Sidebar({
                       )}
                     </p>
                     {distance !== null && distance > 0 && (
-                      <p className="text-xs text-primary mt-1 font-medium">
+                      <p className="text-[10px] sm:text-xs text-primary mt-1 font-medium">
                         {distance.toFixed(2)} km away
                       </p>
                     )}
@@ -171,82 +171,82 @@ export default function Sidebar({
               </div>
             </div>
             {destinationHospital && (
-              <div className="border-t pt-4 space-y-3">
+              <div className="border-t pt-3 sm:pt-4 space-y-2 sm:space-y-3">
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">
                     Destination Hospital
                   </p>
-                  <p className="font-semibold text-lg mt-1">
+                  <p className="font-semibold text-base sm:text-lg mt-1">
                     {destinationHospital.name}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                     {destinationHospital.address}
                   </p>
 
                   {/* AI Reasoning (if available) */}
                   {destinationHospital.reason && (
-                    <div className="mt-3 bg-purple-500/10 border border-purple-500/20 rounded-md p-3">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Sparkles className="w-4 h-4 text-purple-400" />
-                        <span className="text-xs font-semibold text-purple-400">
+                    <div className="mt-2 sm:mt-3 bg-purple-500/10 border border-purple-500/20 rounded-md p-2 sm:p-3">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                        <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" />
+                        <span className="text-[10px] sm:text-xs font-semibold text-purple-400">
                           Gemini AI Analysis
                         </span>
                         {destinationHospital.suitabilityScore && (
                           <Badge
                             variant="outline"
-                            className="ml-auto border-purple-500/50 text-purple-400 text-xs">
+                            className="ml-auto border-purple-500/50 text-purple-400 text-[10px] sm:text-xs">
                             Score:{" "}
                             {destinationHospital.suitabilityScore.toFixed(1)}
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed">
                         {destinationHospital.reason}
                       </p>
                     </div>
                   )}
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="flex items-center gap-2 bg-muted/50 rounded-md p-2">
-                    <BedDouble className="w-4 h-4 text-primary flex-shrink-0" />
-                    <span className="text-xs">
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                  <div className="flex items-center gap-1.5 sm:gap-2 bg-muted/50 rounded-md p-1.5 sm:p-2">
+                    <BedDouble className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
+                    <span className="text-[10px] sm:text-xs">
                       <strong>{destinationHospital.availableBeds}</strong> Beds
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 bg-muted/50 rounded-md p-2">
-                    <HeartPulse className="w-4 h-4 text-primary flex-shrink-0" />
-                    <span className="text-xs">
+                  <div className="flex items-center gap-1.5 sm:gap-2 bg-muted/50 rounded-md p-1.5 sm:p-2">
+                    <HeartPulse className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
+                    <span className="text-[10px] sm:text-xs">
                       <strong>{destinationHospital.availableICUs}</strong> ICUs
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 bg-muted/50 rounded-md p-2">
-                    <Baby className="w-4 h-4 text-primary flex-shrink-0" />
-                    <span className="text-xs">
+                  <div className="flex items-center gap-1.5 sm:gap-2 bg-muted/50 rounded-md p-1.5 sm:p-2">
+                    <Baby className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
+                    <span className="text-[10px] sm:text-xs">
                       <strong>{destinationHospital.availableNICUs}</strong>{" "}
                       NICUs
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 bg-muted/50 rounded-md p-2">
-                    <Siren className="w-4 h-4 text-primary flex-shrink-0" />
-                    <span className="text-xs">
+                  <div className="flex items-center gap-1.5 sm:gap-2 bg-muted/50 rounded-md p-1.5 sm:p-2">
+                    <Siren className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
+                    <span className="text-[10px] sm:text-xs">
                       <strong>
                         {destinationHospital.availableOxygenCylinders}
                       </strong>{" "}
                       O₂
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 bg-muted/50 rounded-md p-2">
-                    <AirVent className="w-4 h-4 text-primary flex-shrink-0" />
-                    <span className="text-xs">
+                  <div className="flex items-center gap-1.5 sm:gap-2 bg-muted/50 rounded-md p-1.5 sm:p-2">
+                    <AirVent className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
+                    <span className="text-[10px] sm:text-xs">
                       <strong>
                         {destinationHospital.availableVentilators}
                       </strong>{" "}
                       Vents
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 bg-muted/50 rounded-md p-2">
-                    <Stethoscope className="w-4 h-4 text-primary flex-shrink-0" />
-                    <span className="text-xs">
+                  <div className="flex items-center gap-1.5 sm:gap-2 bg-muted/50 rounded-md p-1.5 sm:p-2">
+                    <Stethoscope className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
+                    <span className="text-[10px] sm:text-xs">
                       <strong>{destinationHospital.availableDoctors}</strong>{" "}
                       Docs
                     </span>
@@ -257,8 +257,8 @@ export default function Sidebar({
 
             {/* Weather Conditions */}
             {userLocation && (
-              <div className="border-t pt-4">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">
+              <div className="border-t pt-3 sm:pt-4">
+                <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide mb-2 sm:mb-3">
                   Current Conditions
                 </p>
                 <WeatherWidget
@@ -270,22 +270,24 @@ export default function Sidebar({
 
             {/* Driver Information */}
             {dispatchedAmbulance?.driver && (
-              <div className="bg-card/50 border rounded-lg p-4 space-y-2">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+              <div className="bg-card/50 border rounded-lg p-3 sm:p-4 space-y-2">
+                <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">
                   Driver Information
                 </p>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold">
+                    <p className="font-semibold text-sm sm:text-base">
                       {dispatchedAmbulance.driver.name}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs sm:text-sm text-muted-foreground">
                       {dispatchedAmbulance.driver.phone}
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="text-yellow-500">★</span>
-                    <span className="font-semibold">
+                    <span className="text-yellow-500 text-sm sm:text-base">
+                      ★
+                    </span>
+                    <span className="font-semibold text-sm sm:text-base">
                       {dispatchedAmbulance.driver.rating.toFixed(1)}
                     </span>
                   </div>
@@ -295,8 +297,8 @@ export default function Sidebar({
 
             {/* Equipment Available */}
             {dispatchedAmbulance?.equipment && (
-              <div className="bg-card/50 border rounded-lg p-4 space-y-2">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">
+              <div className="bg-card/50 border rounded-lg p-3 sm:p-4 space-y-2">
+                <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">
                   Equipment On Board
                 </p>
                 <div className="flex flex-wrap gap-2">

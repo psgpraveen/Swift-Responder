@@ -386,24 +386,24 @@ export default function AmbulanceMapEnhanced({
       </APIProvider>
 
       {/* Map Controls */}
-      <div className="absolute top-4 right-4 flex flex-col gap-2">
+      <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-1.5 sm:gap-2">
         {/* Zoom Controls */}
         <div className="bg-card/90 backdrop-blur-sm border border-white/10 rounded-lg shadow-lg overflow-hidden">
           <Button
             variant="ghost"
             size="icon"
             onClick={handleZoomIn}
-            className="w-10 h-10 rounded-none border-b border-white/10"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-none border-b border-white/10"
             title="Zoom In">
-            <ZoomIn className="h-4 w-4" />
+            <ZoomIn className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={handleZoomOut}
-            className="w-10 h-10 rounded-none"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-none"
             title="Zoom Out">
-            <ZoomOut className="h-4 w-4" />
+            <ZoomOut className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
         </div>
 
@@ -413,11 +413,11 @@ export default function AmbulanceMapEnhanced({
           size="icon"
           onClick={handleCenterOnUser}
           className={cn(
-            "w-10 h-10 shadow-lg",
+            "w-8 h-8 sm:w-10 sm:h-10 shadow-lg",
             isFollowingUser && "bg-primary animate-pulse"
           )}
           title="Center on Your Location">
-          <Locate className="h-4 w-4" />
+          <Locate className="h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
 
         {/* Fit Bounds */}
@@ -425,9 +425,9 @@ export default function AmbulanceMapEnhanced({
           variant="secondary"
           size="icon"
           onClick={handleFitBounds}
-          className="w-10 h-10 shadow-lg"
+          className="w-8 h-8 sm:w-10 sm:h-10 shadow-lg"
           title="Show All">
-          <Navigation className="h-4 w-4" />
+          <Navigation className="h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
 
         {/* Map Type Toggle */}
@@ -435,7 +435,7 @@ export default function AmbulanceMapEnhanced({
           variant="outline"
           size="sm"
           onClick={handleToggleMapType}
-          className="shadow-lg text-xs px-2"
+          className="shadow-lg text-xs px-1.5 sm:px-2 h-8 sm:h-10"
           title="Change Map Type">
           {mapType === "roadmap" && "🗺️"}
           {mapType === "satellite" && "🛰️"}
@@ -448,11 +448,11 @@ export default function AmbulanceMapEnhanced({
           size="icon"
           onClick={() => setShowTraffic(!showTraffic)}
           className={cn(
-            "w-10 h-10 shadow-lg",
+            "w-8 h-8 sm:w-10 sm:h-10 shadow-lg",
             showTraffic && "bg-orange-500 hover:bg-orange-600"
           )}
           title={showTraffic ? "Hide Traffic" : "Show Traffic"}>
-          <Layers className="h-4 w-4" />
+          <Layers className="h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
 
         {/* Fullscreen Toggle */}
@@ -460,16 +460,16 @@ export default function AmbulanceMapEnhanced({
           variant="outline"
           size="icon"
           onClick={toggleFullscreen}
-          className="w-10 h-10 shadow-lg"
+          className="w-8 h-8 sm:w-10 sm:h-10 shadow-lg"
           title={showFullscreen ? "Exit Fullscreen" : "Fullscreen"}>
-          <Maximize2 className="h-4 w-4" />
+          <Maximize2 className="h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
 
         {/* Compass (shows heading if available) */}
         {heading !== 0 && (
-          <div className="bg-card/90 backdrop-blur-sm border border-white/10 rounded-lg shadow-lg p-2">
+          <div className="bg-card/90 backdrop-blur-sm border border-white/10 rounded-lg shadow-lg p-1.5 sm:p-2">
             <Compass
-              className="h-6 w-6 text-primary"
+              className="h-5 w-5 sm:h-6 sm:w-6 text-primary"
               style={{ transform: `rotate(${heading}deg)` }}
             />
           </div>
@@ -477,25 +477,29 @@ export default function AmbulanceMapEnhanced({
       </div>
 
       {/* Status Indicators */}
-      <div className="absolute bottom-4 left-4 flex flex-col gap-2">
+      <div className="absolute bottom-2 left-2 sm:bottom-4 sm:left-4 flex flex-col gap-1.5 sm:gap-2">
         {/* Live Location Status */}
         {isLiveLocationEnabled && (
-          <Badge className="bg-green-500/90 backdrop-blur-sm text-white">
-            <span className="w-2 h-2 bg-white rounded-full animate-pulse mr-2" />
-            Live Location Active
+          <Badge className="bg-green-500/90 backdrop-blur-sm text-white text-[10px] sm:text-xs">
+            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full animate-pulse mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Live Location Active</span>
+            <span className="sm:hidden">Live</span>
           </Badge>
         )}
 
         {/* Traffic Status */}
         {showTraffic && (
-          <Badge className="bg-orange-500/90 backdrop-blur-sm text-white">
-            <Layers className="w-3 h-3 mr-2" />
-            Traffic Layer On
+          <Badge className="bg-orange-500/90 backdrop-blur-sm text-white text-[10px] sm:text-xs">
+            <Layers className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Traffic Layer On</span>
+            <span className="sm:hidden">Traffic</span>
           </Badge>
         )}
 
         {/* Zoom Level */}
-        <Badge variant="secondary" className="bg-card/90 backdrop-blur-sm">
+        <Badge
+          variant="secondary"
+          className="bg-card/90 backdrop-blur-sm text-[10px] sm:text-xs">
           Zoom: {zoom.toFixed(1)}
         </Badge>
 

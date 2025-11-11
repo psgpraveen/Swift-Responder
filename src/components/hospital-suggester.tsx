@@ -73,63 +73,71 @@ export default function HospitalSuggester() {
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="shadow-sm hover:shadow-md transition-shadow">
-          <Sparkles className="mr-2 h-4 w-4" /> AI Hospital Finder
+          className="shadow-sm hover:shadow-md transition-shadow text-xs sm:text-sm">
+          <Sparkles className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+          <span className="hidden sm:inline">AI Hospital Finder</span>
+          <span className="sm:hidden">AI Finder</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-5xl max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-5xl max-h-[90vh] w-[95vw] sm:w-full flex flex-col p-3 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl">
-            <div className="bg-primary/10 p-2 rounded-lg">
-              <HeartPulse className="text-primary h-6 w-6" />
+          <DialogTitle className="flex items-center gap-1.5 sm:gap-2 text-lg sm:text-2xl">
+            <div className="bg-primary/10 p-1.5 sm:p-2 rounded-lg">
+              <HeartPulse className="text-primary h-4 w-4 sm:h-6 sm:w-6" />
             </div>
             AI Hospital Suggester
           </DialogTitle>
-          <DialogDescription className="text-base">
+          <DialogDescription className="text-xs sm:text-base">
             Find the best hospital based on your medical needs and location. Our
             AI analyzes real-time data on bed availability, ICU capacity, and
             more.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1 min-h-0 py-4">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-1 bg-primary rounded-full"></div>
-              <h3 className="font-semibold text-lg">Your Details</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 flex-1 min-h-0 py-2 sm:py-4">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="h-6 w-0.5 sm:h-8 sm:w-1 bg-primary rounded-full"></div>
+              <h3 className="font-semibold text-base sm:text-lg">
+                Your Details
+              </h3>
             </div>
             <form
               action={dispatch}
-              className="space-y-6 bg-muted/30 rounded-lg p-6 border">
-              <div className="space-y-2">
-                <Label htmlFor="needs" className="text-base font-medium">
+              className="space-y-4 sm:space-y-6 bg-muted/30 rounded-lg p-3 sm:p-6 border">
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label
+                  htmlFor="needs"
+                  className="text-sm sm:text-base font-medium">
                   Medical Need
                 </Label>
                 <Input
                   id="needs"
                   name="needs"
-                  placeholder="e.g., Cardiac care, broken leg, emergency surgery"
+                  placeholder="e.g., Cardiac care, broken leg"
                   required
-                  className="h-11"
+                  className="h-9 sm:h-11 text-sm sm:text-base"
                 />
                 {state.errors?.needs && (
-                  <p className="text-sm text-destructive mt-1 flex items-center gap-1">
+                  <p className="text-xs sm:text-sm text-destructive mt-1 flex items-center gap-1">
                     <span className="font-bold">⚠</span> {state.errors.needs[0]}
                   </p>
                 )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="location" className="text-base font-medium">
+              <div className="space-y-1.5 sm:space-y-2">
+                <Label
+                  htmlFor="location"
+                  className="text-sm sm:text-base font-medium">
                   Your Location
                 </Label>
                 <Input
                   id="location"
                   name="location"
-                  placeholder="e.g., Downtown Los Angeles, Mumbai Central"
+                  placeholder="e.g., Downtown LA, Mumbai"
                   required
-                  className="h-11"
+                  className="h-9 sm:h-11 text-sm sm:text-base"
                 />
                 {state.errors?.location && (
-                  <p className="text-sm text-destructive mt-1 flex items-center gap-1">
+                  <p className="text-xs sm:text-sm text-destructive mt-1 flex items-center gap-1">
                     <span className="font-bold">⚠</span>{" "}
                     {state.errors.location[0]}
                   </p>
