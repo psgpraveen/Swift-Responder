@@ -12,6 +12,15 @@ import {
   findHospitalsQuick,
   type EnhancedHospital,
 } from "../lib/services/gemini-hospital-finder";
+import {
+  selectOptimalAmbulance,
+  getEquipmentRecommendations,
+  type AmbulanceSelectionCriteria,
+} from "../lib/services/ai-ambulance-selector";
+import {
+  predictAIEnhancedETA,
+  type RouteConditions,
+} from "../lib/services/ai-route-optimizer";
 
 const AVERAGE_SPEED_KM_PER_MIN = 0.8; // Approx 48 km/h (fallback)
 
@@ -91,11 +100,39 @@ export function useAmbulanceTracker(
   const findNearestAmbulance = useCallback(() => {
     if (!userLocation) return null;
 
+    // Filter out already dispatched ambulances
+    const availableAmbulances = ambulances.filter(
+      (amb) => amb.id !== dispatchedAmbulance?.id
+    );
+
+    if (availableAmbulances.length === 0) return null;
+
+    // Use AI-powered ambulance selection
+    const criteria: AmbulanceSelectionCriteria = {
+      medicalNeeds: medicalNeedsRef.current,
+      severity: "urgent", // Can be made dynamic based on emergency type
+      requiredEquipment: [], // Auto-determined by AI
+    };
+
+    const scoredAmbulances = selectOptimalAmbulance(
+      availableAmbulances,
+      userLocation,
+      criteria
+    );
+
+    if (scoredAmbulances.length > 0) {
+      const best = scoredAmbulances[0];
+      console.log(`🤖 AI selected ambulance: ${best.id}`);
+      console.log(`   Score: ${best.score}/100`);
+      console.log(`   Reason: ${best.matchReason}`);
+      return best;
+    }
+
+    // Fallback to simple nearest
     let nearestAmbulance: Ambulance | null = null;
     let minDistance = Infinity;
 
-    ambulances.forEach((ambulance) => {
-      if (ambulance.id === dispatchedAmbulance?.id) return; // Don't consider dispatched ambulance
+    availableAmbulances.forEach((ambulance) => {
       const distance = haversineDistance(userLocation, ambulance.location);
       if (distance < minDistance) {
         minDistance = distance;
@@ -274,7 +311,51 @@ export function useAmbulanceTracker(
 
           setRoute(routeInfo.path);
           setDistance(routeInfo.distance);
-          setEta(Math.round(routeInfo.durationInTraffic || routeInfo.duration));
+
+          // Use AI-enhanced ETA prediction
+          const baseETA = Math.round(
+            routeInfo.durationInTraffic || routeInfo.duration
+          );
+          const currentHour = new Date().getHours();
+          const conditions: RouteConditions = {
+            trafficLevel:
+              routeInfo.durationInTraffic &&
+              routeInfo.durationInTraffic > routeInfo.duration * 1.3
+                ? "heavy"
+                : routeInfo.durationInTraffic &&
+                  routeInfo.durationInTraffic > routeInfo.duration * 1.1
+                ? "moderate"
+                : "light",
+            weather: {
+              condition: "clear", // Can be integrated with weather API
+              visibility: 10,
+              temperature: 20,
+            },
+            timeOfDay:
+              currentHour >= 7 && currentHour <= 9
+                ? "morning-rush"
+                : currentHour >= 17 && currentHour <= 19
+                ? "evening-rush"
+                : currentHour >= 22 || currentHour <= 6
+                ? "night"
+                : "midday",
+          };
+
+          try {
+            const aiETA = await predictAIEnhancedETA(baseETA, conditions);
+            setEta(aiETA.predictedETA);
+            console.log(
+              `🤖 AI-Enhanced ETA: ${aiETA.predictedETA} min (confidence: ${aiETA.confidence}%)`
+            );
+            if (aiETA.adjustmentFactors.length > 0) {
+              console.log(
+                `   Adjustments: ${aiETA.adjustmentFactors.join(", ")}`
+              );
+            }
+          } catch (error) {
+            console.log("Using base ETA without AI enhancement");
+            setEta(baseETA);
+          }
 
           // Log turn-by-turn directions if available
           if (routeInfo.steps && routeInfo.steps.length > 0) {
