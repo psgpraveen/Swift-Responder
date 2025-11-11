@@ -442,24 +442,24 @@ export default function Sidebar({
   };
 
   return (
-    <aside className="w-96 bg-card/95 backdrop-blur-sm border-r flex flex-col p-6 space-y-6 shadow-lg">
-      <div className="flex items-center gap-3 text-lg font-semibold">
-        <div className="bg-primary/10 p-2 rounded-lg">
-          <AlertCircle className="text-primary h-5 w-5" />
+    <aside className="w-full md:w-96 lg:w-[28rem] bg-card/95 backdrop-blur-sm border-r md:border-b-0 border-b flex flex-col p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4 md:space-y-6 shadow-lg max-h-[40vh] md:max-h-none overflow-y-auto">
+      <div className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg font-semibold">
+        <div className="bg-primary/10 p-1.5 sm:p-2 rounded-lg">
+          <AlertCircle className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
         </div>
         <span>Emergency Dispatch</span>
       </div>
       <div className="flex-1 overflow-y-auto">{renderContent()}</div>
-      <div className="border-t pt-4 space-y-2">
-        <h3 className="font-semibold text-sm flex items-center gap-2">
-          <Activity className="h-4 w-4" /> System Status
+      <div className="border-t pt-3 sm:pt-4 space-y-2">
+        <h3 className="font-semibold text-xs sm:text-sm flex items-center gap-2">
+          <Activity className="h-3 w-3 sm:h-4 sm:w-4" /> System Status
         </h3>
         <div className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
           </span>
-          <p className="text-sm text-green-400 font-medium">
+          <p className="text-xs sm:text-sm text-green-400 font-medium">
             All systems operational
           </p>
         </div>

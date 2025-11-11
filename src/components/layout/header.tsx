@@ -4,9 +4,9 @@ import { Badge } from "../ui/badge";
 
 export default function Header() {
   return (
-    <header className="flex items-center justify-between p-4 border-b bg-card/95 backdrop-blur-sm z-20 shadow-sm">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-3">
+    <header className="flex items-center justify-between p-2 sm:p-3 md:p-4 border-b bg-card/95 backdrop-blur-sm z-20 shadow-sm">
+      <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="relative">
             <div className="absolute inset-0 bg-primary/20 rounded-full blur-md"></div>
             <svg
@@ -19,7 +19,7 @@ export default function Header() {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="relative text-primary h-9 w-9 drop-shadow-lg">
+              className="relative text-primary h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 drop-shadow-lg">
               <path d="M10.2 2.5c.3-.2.5-.5.8-.5s.6.2.8.5l8.1 5.4c.4.2.6.5.6.9v10.3c0 .5-.4 1-1 1H4.5c-.6 0-1-.5-1-1V8.8c0-.4.2-.7.6-.9l8.1-5.4z"></path>
               <path d="M12 21V11l-10-7"></path>
               <path d="M12 11l10-7"></path>
@@ -28,29 +28,36 @@ export default function Header() {
             </svg>
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-foreground bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Swift Responder
             </h1>
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-              <Shield className="h-3 w-3" />
-              Emergency Medical Services
+            <p className="text-[10px] sm:text-xs text-muted-foreground flex items-center gap-1">
+              <Shield className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+              <span className="hidden xs:inline">
+                Emergency Medical Services
+              </span>
+              <span className="xs:hidden">EMS</span>
             </p>
           </div>
         </div>
-        <div className="border-l pl-4 hidden sm:block">
+        <div className="border-l pl-2 sm:pl-3 md:pl-4 hidden sm:block">
           <div className="flex items-center gap-2 mb-1">
-            <p className="text-xs text-muted-foreground">Organization: India</p>
-            <Badge variant="outline" className="text-xs py-0 h-4">
-              <Activity className="h-2.5 w-2.5 mr-1 text-green-500" />
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
+              Organization: India
+            </p>
+            <Badge
+              variant="outline"
+              className="text-[10px] sm:text-xs py-0 h-3.5 sm:h-4">
+              <Activity className="h-2 w-2 sm:h-2.5 sm:w-2.5 mr-0.5 sm:mr-1 text-green-500" />
               Live
             </Badge>
           </div>
-          <p className="text-xs text-muted-foreground font-mono">
+          <p className="text-[10px] sm:text-xs text-muted-foreground font-mono">
             ID: 3128-2810-3755
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <HospitalSuggester />
       </div>
     </header>
